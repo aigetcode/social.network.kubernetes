@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: social-config
-data:
-  SOCIAL_BACKEND_HOST1: http://social-backend-service

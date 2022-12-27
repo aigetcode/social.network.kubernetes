@@ -1,0 +1,16 @@
+namespace: &namespace social-test
+appHost: social-test.local
+
+apps:
+  backend:
+    namespace: *namespace
+    replicasCount: 1
+    container:
+      image: social-users
+      version: 0.0.2
+  frontend:
+    namespace: *namespace
+    replicasCount: 1
+    container:
+      image: social-frontend
+      version: 0.0.2

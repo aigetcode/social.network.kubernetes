@@ -1,0 +1,43 @@
+appName: social
+frontIngressService: social-frontend-service
+userApiIngressService: social-backend-service
+apiHost: http://social-backend-service
+appHost: social.local
+namespace: &namespace default
+
+database:
+  host: host.docker.internal
+  port: 5432
+
+apps:
+  backend:
+    appName: social-backend
+    namespace: *namespace
+    replicasCount: 2
+    container:
+      image: social-users
+      version: 0.0.2
+      port: 8080
+      env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://host.docker.internal/users
+        - name: SPRING_DATASOURCE_USERNAME
+          value: postgres
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "123"
+    service:
+      port: 80
+      targetPort: 8080
+  frontend:
+    appName: social-frontend
+    namespace: *namespace
+    replicasCount: 2
+    container:
+      image: social-frontend
+      version: 0.0.2
+      port: 3000
+    service:
+      type: LoadBalancer
+      port: 80
+      targetPort: 3000
+      nodePort: 30000
