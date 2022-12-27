@@ -1,23 +1,23 @@
-## запуск миникуба на локальном компе
+## Run minicube on local computer
     minikube start --driver=virtualbox --no-vtx-check
     eval $(minikube docker-env)
 
-### дополнения для командной строки
+### Command line plugins
     source <(kubectl completion zsh)
 
 
-### добавить ingress в k8s
+### Add ingress in k8s
     minikube addons enable ingress
 
 
-### настроить pg_hba.conf
-    поменять IPv4 local connections:
+### Settings pg_hba.conf
+    change IPv4 local connections:
     127.0.0.1/32 - 0.0.0.0/0
 
 
 http://192.168.59.100:30000/
 
-ingress нужно настроить в фале hosts
+`ingress` needs to be configured in the file `hosts`
 
 http://social.local/
 
