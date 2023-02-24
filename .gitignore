@@ -3,3 +3,6 @@
 *.iws
 *.iml
 *.ipr
+
+docker/data/*
+docker/docker/**/*.jar
