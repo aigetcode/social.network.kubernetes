@@ -1,0 +1,23 @@
+version: "3"
+
+#name: social-storage
+services:
+  # Storage S3
+  minio:
+    container_name: minio
+    image: bitnami/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - ../data/minio:/data
+    networks:
+      - social
+
+networks:
+  social:
+    driver: bridge
+    external: true

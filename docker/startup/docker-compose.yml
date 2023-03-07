@@ -1,21 +1,24 @@
-version: "1.0"
-name: social-network
+version: "3"
+
+#name: social-network
 services:
   gateway:
     container_name: social-gateway
-    image: ghcr.io/aigetcode/social-gateway
+    image: social-gateway:0.0.1
     ports:
       - "8090:8080"
     environment:
       GATEWAY_PORT: 8080
       GATEWAY_USER_URL: http://users:8081/
       GATEWAY_ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+    depends_on:
+      - users
     networks:
       - social
 
   users:
     container_name: social-users
-    image: ghcr.io/aigetcode/social-users
+    image: social-users:0.0.2
 #    ports:
 #      - "8008:8080"
     environment:
@@ -28,28 +31,30 @@ services:
       - psql
     networks:
       - social
+      - psql-network
 
+  ### Database ###
   psql:
     image: postgres:15
     container_name: social-psql
-#    ports:
-      #      - "внешний : внутренний"
-#      - "5001:5432"
+    #    ports:
+    #      - "внешний : внутренний"
+    #      - "5001:5432"
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - ../data/postgres:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: users
+      #      POSTGRES_DB: users
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     restart: unless-stopped
     networks:
-      - social
+      - psql-network
 
   pgadmin:
     image: dpage/pgadmin4:6.15
     container_name: social-pgadmin
     ports:
-      - "9000:80"
+      - "9080:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: root@admin.org
       PGADMIN_DEFAULT_PASSWORD: root
@@ -57,38 +62,16 @@ services:
     depends_on:
       - psql
     networks:
-      - social
-
-  grafana:
-    build: './docker/prometheus'
-    ports:
-      - 3000:3000
-    volumes:
-      - ./data/grafana:/var/lib/grafana
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
-    networks:
-      - social
-
-  prometheus:
-    image: prom/prometheus
-    ports:
-      - 9090:9090
-    volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./data/prometheus:/prometheus
-    networks:
-      - social
-
-  zipkin:
-    container_name: zipkin
-    image: openzipkin/zipkin
-    ports:
-      - "9411:9411"
-    networks:
-      - social
+      - psql-network
 
 networks:
   social:
     driver: bridge
+    external: true
+  psql-network:
+    driver: bridge
+    external: true
+
+volumes:
+  elasticsearch_data:
+    driver: local
