@@ -14,11 +14,16 @@ do_clean_docker() {
 }
 
 do_up_daemon() {
-    docker-compose up -d
-}
-
-do_up() {
-    docker-compose up
+    # shellcheck disable=SC2164
+    cd startup
+    docker network inspect social >/dev/null 2>&1 || \
+        docker network create --driver bridge social
+    docker network inspect psql-network >/dev/null 2>&1 || \
+            docker network create --driver bridge psql-network
+    docker-compose -p elk -f docker-compose-elk.yml up -d
+    docker-compose -p storage -f docker-compose-storage.yml up -d
+    docker-compose -p metrics -f docker-compose-metrics.yml up -d
+    docker-compose -p project -f docker-compose.yml up -d
 }
 
 do_clean_data() {
