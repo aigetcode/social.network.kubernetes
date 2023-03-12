@@ -1,6 +1,6 @@
 appName: social
-frontIngressService: social-frontend-service
-userApiIngressService: social-backend-service
+#frontIngressService: social-frontend-service
+gatewayApiIngressService: gateway-service
 apiHost: http://social-backend-service
 appHost: social.local
 namespace: &namespace default
@@ -10,17 +10,44 @@ database:
   port: 5432
 
 apps:
-  backend:
-    appName: social-backend
+  gateway-service:
+    appName: gateway
+    namespace: *namespace
+    replicasCount: 2
+    container:
+      image: social-gateway
+      version: 0.0.1
+      port: 8080
+      env:
+        - name: SERVICE_PORT
+          value: 8080
+        - name: GATEWAY_USER_URL
+          value: http://user-service:8081/
+        - name: GATEWAY_NEWS_URL
+          value: http://news-service:8082/
+        - name: SERVICE_ZIPKIN_URL
+          value: http://zipkin-service/api/v2/spans
+    service:
+      port: 80
+      targetPort: 8080
+
+  user-service:
+    appName: user
     namespace: *namespace
     replicasCount: 2
     container:
       image: social-users
       version: 0.0.2
-      port: 8080
+      port: 8081
       env:
+        - name: SERVICE_PORT
+          value: 8080
+        - name: SERVICE_ZIPKIN_URL
+          value: http://zipkin-service/api/v2/spans
+        - name: SERVICE_LOGSTASH_URL
+          value: logstash-service
         - name: SPRING_DATASOURCE_URL
-          value: jdbc:postgresql://host.docker.internal/users
+          value: jdbc:postgresql://postgres/users
         - name: SPRING_DATASOURCE_USERNAME
           value: postgres
         - name: SPRING_DATASOURCE_PASSWORD
@@ -28,16 +55,78 @@ apps:
     service:
       port: 80
       targetPort: 8080
-  frontend:
-    appName: social-frontend
+
+  news-service:
+    appName: news
+    namespace: *namespace
+    replicasCount: 1
+    container:
+      image: social-news
+      version: 0.0.1
+      port: 8082
+      env:
+        - name: SERVICE_PORT
+          value: 8080
+        - name: SERVICE_ZIPKIN_URL
+          value: http://zipkin-service/api/v2/spans
+        - name: SERVICE_LOGSTASH_URL
+          value: logstash-service
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://postgres/users
+        - name: SPRING_DATASOURCE_USERNAME
+          value: postgres
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "123"
+        - name: SERVICE_AWS_S3_HOST
+          value: http://minio-service
+        - name: SERVICE_AWS_S3_ACCESS_KEY
+          value: u4QeDzDwDsK74FzE
+        - name: SERVICE_AWS_S3_SECRET_KEY
+          value: Efmm0HwgHfH2lJM0VmdG8ehKaUz2WRNm
+    service:
+      port: 80
+      targetPort: 8080
+
+  zipkin-service:
+    appName: zipkin
     namespace: *namespace
     replicasCount: 2
     container:
-      image: social-frontend
-      version: 0.0.2
-      port: 3000
+      image: openzipkin/zipkin
+      version: latest
+      port: 8080
+      volume:
+        mountName: zipkin-volume
+        path: /data/zipkin
     service:
-      type: LoadBalancer
       port: 80
-      targetPort: 3000
-      nodePort: 30000
+      targetPort: 8080
+
+  minio-service:
+    appName: minio
+    namespace: *namespace
+    replicasCount: 2
+    container:
+      image: bitnami/minio
+      version: latest
+      port: 8080
+      volume:
+        mountName: zipkin-volume
+        path: /data/zipkin
+    service:
+      port: 80
+      targetPort: 8080
+
+#  frontend:
+#    appName: social-frontend
+#    namespace: *namespace
+#    replicasCount: 2
+#    container:
+#      image: social-frontend
+#      version: 0.0.2
+#      port: 3000
+#    service:
+#      type: LoadBalancer
+#      port: 80
+#      targetPort: 3000
+#      nodePort: 30000
