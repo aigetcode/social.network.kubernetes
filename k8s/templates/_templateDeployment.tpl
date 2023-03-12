@@ -29,6 +29,18 @@ spec:
             limits:
               memory: 512M
               cpu: 200m
+{{- if .container.volumeMounts }}
+          volumeMounts:
+            - mountPath: /data
+              name: {{ .container.volume.mountName }}
+{{- end}}
+{{- if .container.volumeMounts }}
+      volumes:
+        - name: {{ .container.volume.mountName }}
+          hostPath:
+            path: {{ .container.volume.path }}
+            type: DirectoryOrCreate
+{{- end}}
 {{- if .container.env }}
           env:
 {{ toYaml .container.env | indent 12 }}

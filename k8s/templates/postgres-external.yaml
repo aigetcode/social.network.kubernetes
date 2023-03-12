@@ -8,4 +8,4 @@ spec:
   externalName: {{ .Values.database.host }}
   ports:
     - name: port
-      port: {{ .Values.database.port }}5432
+      port: {{ .Values.database.port }}
