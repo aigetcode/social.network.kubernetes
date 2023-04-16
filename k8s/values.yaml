@@ -15,7 +15,7 @@ apps:
     namespace: *namespace
     replicasCount: 2
     container:
-      image: social-gateway
+      image: ghcr.io/aigetcode/social-gateway
       version: 0.0.1
       port: 8080
       env:
@@ -36,7 +36,7 @@ apps:
     namespace: *namespace
     replicasCount: 2
     container:
-      image: social-users
+      image: ghcr.io/aigetcode/social-users
       version: 0.0.2
       port: 8081
       env:
@@ -61,7 +61,7 @@ apps:
     namespace: *namespace
     replicasCount: 1
     container:
-      image: social-news
+      image: ghcr.io/aigetcode/social-news-service
       version: 0.0.1
       port: 8082
       env:
@@ -90,7 +90,7 @@ apps:
   zipkin-service:
     appName: zipkin
     namespace: *namespace
-    replicasCount: 2
+    replicasCount: 1
     container:
       image: openzipkin/zipkin
       version: latest
@@ -105,7 +105,7 @@ apps:
   minio-service:
     appName: minio
     namespace: *namespace
-    replicasCount: 2
+    replicasCount: 1
     container:
       image: bitnami/minio
       version: latest

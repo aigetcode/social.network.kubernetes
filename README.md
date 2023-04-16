@@ -3,6 +3,7 @@
 
 ## Run minicube on local computer
     minikube start --driver=virtualbox --no-vtx-check
+    minikube start --hyperv-virtual-switch=minikube
     eval $(minikube docker-env)
 
 ### Command line plugins
