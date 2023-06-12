@@ -21,6 +21,13 @@ do_up_daemon() {
     docker network inspect psql-network >/dev/null 2>&1 || \
             docker network create --driver bridge psql-network
     docker-compose -p elk -f docker-compose-elk.yml up -d
+
+    # shellcheck disable=SC2164
+    cd ../postgres
+    docker build -t mypostgres:01 .
+    # shellcheck disable=SC2164
+    cd ../startup
+
     docker-compose -p storage -f docker-compose-storage.yml up -d
     docker-compose -p metrics -f docker-compose-metrics.yml up -d
     docker-compose -p project -f docker-compose.yml up -d

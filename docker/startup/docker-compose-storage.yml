@@ -1,23 +1,48 @@
 version: "3"
 
-#name: social-storage
 services:
   # Storage S3
   minio:
     container_name: minio
-    image: bitnami/minio
+    image: minio/minio
+    command: server --console-address ":443" /data
     ports:
       - "9000:9000"
-      - "9001:9001"
+      - "443:443"
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     volumes:
-      - ../data/minio:/data
+      - ./minio/data:/data
+      - ./minio/certs:/root/.minio/certs
     networks:
       - social
+  postgresql:
+    image: mypostgres:01
+    command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.crt -c ssl_key_file=/var/lib/postgresql/server.key
+    environment:
+      POSTGRES_DB: news
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5433:5432"
 
 networks:
   social:
     driver: bridge
     external: true
+
+
+# эталон
+#services:
+#  minio:
+#    image: minio/minio
+#    command: server --console-address ":443" /data
+#    ports:
+#      - "443:443"
+#    environment:
+#      MINIO_ACCESS_KEY: "YourAccesskey"
+#      MINIO_SECRET_KEY: "YourSecretkey"
+#    volumes:
+#      - ./minio/data:/data
+#      - ./minio/certs:/root/.minio/certs
